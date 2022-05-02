@@ -1,18 +1,37 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Subscription } from '@nestjs/graphql';
 import { DonationCreateInput } from 'src/@generated/prisma-nestjs-graphql/donation/donation-create.input';
 import { OrderByParams } from 'src/graphql';
 import { DonationsService } from './donations.service';
+
+import { PubSub } from 'graphql-subscriptions';
+
+const pubSub = new PubSub();
 
 @Resolver('Donation')
 export class DonationsResolver {
   constructor(private readonly donationsService: DonationsService) {}
 
   @Mutation('createDonation')
-  create(
+  async create(
     @Args('createDonationInput')
     createDonationInput: DonationCreateInput,
   ) {
-    return this.donationsService.create(createDonationInput);
+    // Create donation
+    const created = await this.donationsService.create(createDonationInput);
+    // Getting the total of donation
+    const total = await this.donationsService.getTotal();
+
+    // Publishing the event with the shape of the data we want in return
+    pubSub.publish('totalUpdated', { totalUpdated: { total } });
+
+    // Returning the donation that has been created
+    return created;
+  }
+
+  @Subscription()
+  totalUpdated() {
+    // Creating the event handler when we want to get the total
+    return pubSub.asyncIterator('totalUpdated');
   }
 
   @Query('donations')
