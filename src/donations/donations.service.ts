@@ -9,11 +9,7 @@ export class DonationsService {
   }
 
   findAll() {
-    return [
-      {
-        exampleField: 1,
-      },
-    ];
+    return `test`;
   }
 
   findOne(id: number) {
