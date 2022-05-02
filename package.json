@@ -5,7 +5,11 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
+
     "gen-typings": "ts-node ./src/generate-typings",
     "prebuild": "rimraf dist",
     "build": "nest build",
